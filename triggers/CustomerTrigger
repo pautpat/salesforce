@@ -1,0 +1,24 @@
+// Create an Invoice record when the Customer's Status field is updated to 'Active'
+
+trigger CustomerTrigger on Customer_APEX__c (after update) {
+    //create a list of Invoice Objects to store newly created Invoices 
+    List< APEX_Invoice__c> newInvoiceList = new List< APEX_Invoice__c>();
+    // Iterate through the newly updated Customer records
+    for(Customer_APEX__c  cust : Trigger.new){
+        if(cust.APEX_Customer_Status__c == 'Active'){
+            // Create an instance Invoice object
+            APEX_Invoice__c newInvoice = new APEX_Invoice__c();
+            // Set Invoice object field values
+            newInvoice.APEX_Status__c = 'Pending';
+            newInvoice.APEX_Description__c = 'Created via trigger';
+            newInvoice.APEX_Amount_Paid__c = 100;
+            newInvoice.APEX_Customer__c = cust.Id;
+            // Add Invoice Object instance to the list of Invoice Objects
+            newInvoiceList.add(newInvoice);
+        }
+    
+    
+    }
+    //Insert Invoices to the databse using DML Insert operation
+    insert(newInvoiceList);
+}
