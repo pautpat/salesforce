@@ -1,0 +1,19 @@
+//Craete an Invoice record when Customer's customer Status field changes from 
+//Non-Active to Active
+
+trigger CustomerAfterUpdateTrigger on Customer_APEX__c (after update) {
+    List<apex_invoice__c> invList = new List<apex_invoice__c>();
+    for (Customer_APEX__c custObj: Trigger.new) {
+        //condition to check the old value and new value
+        if (custObj.APEX_Customer_Status__c == 'Active' && trigger.oldMap.get(custObj.id).APEX_Customer_Status__c != 'Active') {
+            APEX_Invoice__c invObj = new APEX_Invoice__c();
+            invObj.APEX_Status__c = 'Pending';
+            invObj.APEX_Customer__c = custObj.id;
+            invObj.Apex_Description__c='trigger created the invoice';
+            invList.add(invObj);
+        }
+    }
+
+    //DML to insert the Invoice List in SFDC
+    insert invList;
+}
