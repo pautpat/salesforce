@@ -1,0 +1,19 @@
+//This trigger will delete the Account record only if the name of the Account
+// is 'OkToDelete', otherwise it will throw an error
+
+rigger myAccountBeforeDeleteTrigger on Account (Before Delete) {
+
+if(Trigger.isBefore){
+    if(Trigger.isDelete){
+    List<Account> accList = new List<Account>();
+
+    for(Account a: Trigger.old){
+     if (a.Name != 'OkToDelete')
+       a.addError('Cannot delete this account');     
+       }
+  
+    }
+   }
+}
+
+

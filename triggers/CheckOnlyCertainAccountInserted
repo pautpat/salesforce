@@ -1,0 +1,16 @@
+// This trigger checks that only an Account with specif information is inserted before the Account is inserted in the Salesforce.com
+
+
+trigger checkOnlyCertainAccountInserted on Account (before insert) {
+
+if(Trigger.isInsert){
+    if(Trigger.isBefore){
+        for(Account a:Trigger.new){
+            System.assertEquals('MyTutorialRack', a.Name);
+            System.assertEquals('12345678', a.AccountNumber);
+            System.assertEquals(100, a.NumberOfEmployees);
+            System.assertEquals(200, a.AnnualRevenue);
+        }
+    }
+}
+}

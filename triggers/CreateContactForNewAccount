@@ -1,0 +1,14 @@
+// Create a trigger to create a ne Contact everytime a new Account is created
+
+trigger CreateContactForNewAccount on Account (after insert) {
+List<Contact> conList = new List<Contact>();
+
+for(Account a : trigger.new){
+    Contact c = new Contact();
+    c.lastName = a.Name;
+   // c.Account.Id = a.Id;
+    conList.add(c);
+}
+insert(conList);
+
+}
