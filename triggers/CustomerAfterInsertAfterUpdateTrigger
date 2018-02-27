@@ -1,0 +1,9 @@
+//As per Apex design pattern, there should be only one Trigger per Object to avoid conflicts and  errors dur to hitting governance limit
+
+trigger customerAfterInsertAfterUpdateTrigger on Customer_APEX__c (after insert, after update) {
+
+if(Trigger.isAfter && Trigger.isUpdate){
+    CustomerTriggerHelperClass.createInvoiceRecords(Trigger.new, Trigger.oldMap);
+ }
+
+}

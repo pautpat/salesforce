@@ -1,0 +1,23 @@
+// Why this Helper class is created?
+// As per the Apex design pattern, the Apex classes should be used to 
+// delegate the processing of trigger to increase the code efficiency
+// This heleper class is called bu the trigger customerAfterInsertAfterUpdateTrigger
+
+public class CustomerTriggerHelperClass{
+
+public static void createInvoiceRecords(List<Customer_APEX__c> custList, Map<Id, Customer_APEX__c> objMap){
+    List<APEX_Invoice__c> invList = new List<APEX_Invoice__c>();
+    
+    for(Customer_APEX__c cust : custList){
+        if(cust.APEX_Customer_Status__c == 'Active' && objMap.get(cust.Id).APEX_Customer_Status__c != 'Active'){
+        APEX_Invoice__c invObj = new APEX_Invoice__c();
+            invObj.APEX_Status__c = 'Pending';
+            invObj.APEX_Customer__c = cust.id;
+            invObj.Apex_Description__c='trigger created the invoice';
+            invList.add(invObj);
+         
+        }
+        insert invList;
+        }
+    }
+}
