@@ -1,0 +1,47 @@
+// Update the Customer Description and Customer Status fields of Customer Records when the Customer's 'Active' checkbox is marked. This should be done on a daily basis and an email shoud be sent to the developers when processing is complete
+
+global class CustomerProcessingBatch implements Database.Batchable<sObject> {
+    //Create a list of email addresses
+    String[] email = new String[]{'pautpatjob@gmail.com'};
+    
+     //Start Method
+     global Database.QueryLocator start(Database.BatchableContext BC){
+            return Database.getQueryLocator('Select id,name,APEX_Active__c,APEX_Customer_Description__c, APEX_Customer_Status__c from Customer_APEX__c where APEX_Active__c=true');
+        }
+    
+    //Execute Method
+    global void execute(Database.BatchableContext BC, List<sObject> scope){
+        List<Customer_APEX__c> listToBeUpdated = new List<Customer_APEX__c>();
+        for(sObject scp : scope){
+            Customer_APEX__c newObjectScope =(Customer_APEX__c)scp;
+			newObjectScope.APEX_Customer_Description__c='Updated via Batch Job';
+            newObjectScope.APEX_Customer_Status__c ='Paid';
+            listToBeUpdated.add(newObjectScope);
+            System.debug('Updated list of Objects is '+ listToBeUpdated);
+        }
+        if(listToBeUpdated != null && listToBeUpdated.size()>0){
+        	update listToBeUpdated;
+            System.debug('Successfully updated to databse '+listToBeUpdated );
+        } 
+    }
+    
+    //Finish method
+    global void finish(Database.BatchableContext BC){
+        Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+        AsyncApexJob a = [Select a.TotalJobItems, a.Status,a.LastProcessed,a.CreatedDate,a.Id,a.JobItemsProcessed, a.NumberOfErrors,a.ExtendedStatus from AsyncApexJob a where id=:BC.getJobId()];
+        System.debug('Job Details are '+ a);
+        mail.setToAddresses(email);
+        mail.setSubject('Details of Batch Job '+a.Id);
+        mail.setSenderDisplayName('Apex Batch Processing example');
+        mail.setReplyTo('pautpatjob@gmail.com');
+		mail.setPlainTextBody('The Batch Apex job processed  '+a.TotalJobItems+'batches with  '+a.NumberOfErrors+'failures'+'Job Item processed are'+a.JobItemsProcessed);
+  		Messaging.sendEmail(new Messaging.Singleemailmessage [] {mail});
+        
+    }
+  
+}
+
+
+// This class can be invoked as 
+CustomerProcessingBatch cBatch = new CustomerProcessingBatch();
+Database.executeBatch(cBatch);
